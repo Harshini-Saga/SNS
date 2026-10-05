@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+<title>
+    {% block title %}
+        Login
+    {% endblock %}
+</title>
+
+
+<body>
+{% block navmenu %}
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h2>SNS Login</h2>
+        <p>Login to account to manage your Notes and Files</p>
+        <form action="">
+            <div>
+                <label for="email">email</label>
+                <input type="email" name="email" id="">
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" name="password" id="">
+            </div>  
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+            <p>Don't have account?<a href="/register">Register</a></p>
+        </form>
+    </div>
+{% endblock %}
+</body>
