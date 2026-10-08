@@ -1,10 +1,10 @@
 from flask import Flask,render_template,request,redirect,session
 from database import createTables
 from database import AuthQueries
-from utils import EmailTemplates,sendEmail
+from utils import EmailTemplates,sendEmail,generateHashPassword
 import random
 app=Flask(__name__)
-
+app.secret_key = "Harshini@2005"
 #home route
 @app.route('/')
 def home():
@@ -58,15 +58,30 @@ def register():
         session['otp'] = otp
         session['username'] = name
         session['password'] = password
+        session['email'] = email
         # redirect to verify otp page
         return redirect('/verify-otp')
 @app.route('/verify-otp',methods=['GET','POST'])
 def verifyotp():
     if request.method=="GET":
         return render_template("verifyotp.html")
-    
-
+    if request.method=="POST":
+        otp=int(request.form.get('otp'))
+        #match otp
+        if otp!=session['otp']:
+            print("OTP Incorrect")
+            return redirect("/verify-otp")
+        hash_password = generateHashPassword(password=session['password'])
+        #store user data in database
+        status,msg=AuthQueries.insertUserRecord(username=session['username'],email=session['email'],hash_password=hash_password)
+        if status == False:
+            print(msg)
+            return redirect('/')
+        if status==True:
+            print(msg)
+            return redirect('/login')
 #main
 if __name__=="__main__":
     print(createTables())
     app.run(debug=True)
+    

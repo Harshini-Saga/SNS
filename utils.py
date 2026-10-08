@@ -3,11 +3,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
 import os
-
+import bcrypt
 load_dotenv()
 
 
-SMTP_SERVER = "www.smtp.gmail.com"
+SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.getenv('sender_email')
 SENDER_PASSKEY = os.getenv('passkey')
@@ -44,3 +44,11 @@ class EmailTemplates:
         SNS Management"""
         return template
 
+#generate hashpasswod
+def generateHashPassword(password:str):
+    hash_password=bcrypt.hashpw(password=password.encode('utf-8'),salt=bcrypt.gensalt(4))
+    return hash_password
+#validate hash password
+def validateHashPassword(password:str,hash_password:str):
+    status=bcrypt.checkpw(password=password.encode('utf-8'),hash_password=hash_password.encode('utf-8'))
+    return status
