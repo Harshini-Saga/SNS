@@ -1,21 +1,24 @@
 from database.connection import DatabaseConnection
 class AuthQueries:
     @staticmethod
-    def checkEmailExists(email:str):
+    def checkEmailExists(email:str,data:bool=False):
         try:
             db_config=DatabaseConnection()
-            cursor=db_config.cursor()
+            cursor=db_config.cursor(dictionary=True)
             query = """select * from users where email = %s"""
             cursor.execute(query,(email,))
             user = cursor.fetchone()
             db_config.close()
             cursor.close()
             if user:
-                return True,"Email Exists"
+                if data:
+                     return True,user
+                else:
+                    return True,"Email Exists"
             else:
                 return False,"Email Not exists"
         except Exception as e:
-            return False,f"Something wrong in database/utilsDB.py-AuthQuesries.checkEmailExists():{e}"
+            return False,f"Something wrong in database/utilsDB.py-AuthQueries.checkEmailExists():{e}"
     @staticmethod
     def insertUserRecord(username:str,email:str,hash_password:str):
         try:
@@ -28,4 +31,18 @@ class AuthQueries:
                 cursor.close()
                 return True,"Successfully Registered"
         except Exception as e:
-                return False,f"Something wrong in database/utilsDB.py-AuthQuesries.insertUserRecord():{e}"
+                return False,f"Something wrong in database/utilsDB.py-AuthQueries.insertUserRecord():{e}"
+    @staticmethod
+    def updatePassword(email:str,hash_password:str):
+        try:
+            db_config=DatabaseConnection()
+            cursor=db_config.cursor()
+            query = """update users set hashpassword=%s where email=%s"""
+            cursor.execute(query,(hash_password,email))
+            db_config.commit()
+            db_config.close()
+            cursor.close()
+            return True,"Password Updated Successfully"
+        except Exception as e:
+            return False,f"Something wrong in database/utilsDB.py-AuthQueries.updatePassword():{e}"
+

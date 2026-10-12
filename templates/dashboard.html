@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+{% block navmenu %}
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+{% endblock %}
+
+{% block content %}
+<div>
+    <hr>
+    <h2>SNS Dashboard</h2>
+    <p>Upload your Notes and Files</p>
+
+    <form action="/dashboard" method="POST">
+        <div>
+            <button type="submit" name="action" value="files">
+                Files
+            </button>
+        </div>
+        <br>
+        <div>
+            <button type="submit" name="action" value="notes">
+                Notes
+            </button>
+        <br>
+        </div>
+    </form>
+</div>
+{% endblock %}

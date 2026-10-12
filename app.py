@@ -1,10 +1,29 @@
-from flask import Flask,render_template,request,redirect,session
+from flask import Flask,render_template,request,redirect,session,url_for
 from database import createTables
 from database import AuthQueries
-from utils import EmailTemplates,sendEmail,generateHashPassword
+from utils import EmailTemplates,sendEmail,generateHashPassword,validateHashPassword
 import random
+#used to create token and validate token
+from itsdangerous import URLSafeTimedSerializer,SignatureExpired,BadTimeSignature 
 app=Flask(__name__)
 app.secret_key = "Harshini@2005"
+serializer=URLSafeTimedSerializer(app.secret_key)
+
+#generate token
+def generateToken(email:str):
+    token=serializer.dumps(obj=email,salt="reset-password")
+    return token
+
+def validateToken(token):
+    try:
+        data = serializer.loads(token, salt="reset-password",max_age=600)#10 mins
+        return data
+    except BadTimeSignature:
+        print("Time Expired")
+        return redirect('/login')
+    except SignatureExpired:
+        print("Invalid URL")
+        return redirect('/login')
 #home route
 @app.route('/')
 def home():
@@ -19,7 +38,19 @@ def login():
     if request.method == 'POST':
         email=request.form.get("email")
         password=request.form.get("password")
-        print(email,password)
+        #check whether email exists or not
+        status,user = AuthQueries.checkEmailExists(email=email,data=True)
+        if status == False:
+            print(user)
+            return redirect('/login')
+        #match the password with the database password
+        status = validateHashPassword(password=password,hash_password=user['hashpassword'])
+        if status == False:
+            print("Password incorrect")
+            return redirect('/login')
+        #redirect to dashboard page
+        return redirect('/dashboard')
+
 @app.route("/register",methods=['GET','POST'])
 def register():
     #GET Request
@@ -80,6 +111,63 @@ def verifyotp():
         if status==True:
             print(msg)
             return redirect('/login')
+
+#forgot password
+@app.route('/forgot-password',methods=['GET','POST'])
+def forgot_password():
+    if request.method=='GET':
+        return render_template('forgot_password.html')
+    if request.method == 'POST':
+        email=request.form.get('email')
+        #check email exists
+        status,msg=AuthQueries.checkEmailExists(email=email)
+        if status == False:
+            print(msg)
+            return redirect(url_for('login'))
+        #generate token
+        token=generateToken(email=email)
+        reset_link=url_for('reset_password',token=token,_external=True)
+        #store email in token
+        #generate reset password link
+        #send link via email
+        body = EmailTemplates.forgotPasswordTemplate(url=reset_link)
+        status,msg=sendEmail(to_email=email,subject="Reset Password - SNS",
+                            body=body)
+        if status == False:
+            print(msg)
+            return redirect(url_for('forgot_password'))
+        print(msg)
+        #redirect to login page
+        return redirect(url_for('login'))
+#reset password
+@app.route('/reset-password/<token>', methods=['GET','POST'])
+def reset_password(token):
+    #validate token
+    email=validateToken(token=token)
+    if request.method == 'GET':
+        return render_template('reset_password.html',token_val=token)
+    if request.method == 'POST':
+        new_password=request.form.get('new_password')
+        confirm_password=request.form.get('confirm_password')
+        if new_password!=confirm_password:
+            print("Password missmatch")
+            return redirect(url_for('reset_password',token=token))
+        #generate hash password
+        hash_password=generateHashPassword(password=new_password)
+        #update new hash password in database
+        status,msg=AuthQueries.updatePassword(email=email,hash_password=hash_password)
+        print(msg)
+        return f"<h2>{msg}</h2>"
+        #return msg like "Password updated"
+
+
+
+@app.route('/dashboard')
+def dashboard():
+    if request.method== 'GET':
+        return render_template('dashboard.html') 
+    
+
 #main
 if __name__=="__main__":
     print(createTables())
