@@ -5,29 +5,35 @@
 {% endblock %}
 
 {% block navmenu %}
-    <a href="/login">Login</a>
-    <a href="/register">Register</a>
+    <a href="/dashboard">Home</a>
+    <a href="#">Files</a>
+    <a href="/dashboard/notes">Notes</a>
+    <a href="#">Profile</a>
+    <a href="#">Logout</a>
 {% endblock %}
 
 {% block content %}
-<div>
-    <hr>
-    <h2>SNS Dashboard</h2>
-    <p>Upload your Notes and Files</p>
-
-    <form action="/dashboard" method="POST">
+    <div style="text-align: center;">
         <div>
-            <button type="submit" name="action" value="files">
-                Files
-            </button>
+            <h2>SNS</h2>
         </div>
-        <br>
         <div>
-            <button type="submit" name="action" value="notes">
-                Notes
-            </button>
-        <br>
+            <h4>Welcome {{ username }}</h4>
+            <p>Here you can manage your files and notes</p>            
         </div>
-    </form>
-</div>
+        <div>
+            <div>
+                <button><a href="#">My Files</a></button>
+                <button><a href="/dashboard/notes">My Notes</a></button>
+            </div>
+            <div>
+                <strong>Total Files</strong>
+                <h4>{{ total_files }} </h4>
+            </div>
+            <div>
+                <strong>Total Notes</strong>
+                <h4>{{ total_notes }} </h4>
+            </div>
+        </div>
+    </div>
 {% endblock %}

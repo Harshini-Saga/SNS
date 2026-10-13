@@ -45,4 +45,42 @@ class AuthQueries:
             return True,"Password Updated Successfully"
         except Exception as e:
             return False,f"Something wrong in database/utilsDB.py-AuthQueries.updatePassword():{e}"
-
+class NotesQueries:
+    @staticmethod
+    def insertNotesRecord(userid:int,title:str,content:str):
+         try:
+              db_config=DatabaseConnection()
+              cursor=db_config.cursor()
+              query = """insert into notes(userid,title,content) values (%s,%s,%s)"""
+              cursor.execute(query,(userid,title,content))
+              db_config.commit()
+              db_config.close()
+              cursor.close()
+              return True,"Data Inserted Successfully"
+         except Exception as e:
+              return False,f"Something wrong in database/utilsDB.py-NotesQueries.insertNotesrecord):{e}"
+    @staticmethod
+    def getAllNotes(userid:int,notesid:int=None):
+             try:
+                  db_config=DatabaseConnection()
+                  cursor=db_config.cursor(dictionary=True)
+                  query = """select * from notes where userid = %s"""
+                  values=[userid]
+                  if notesid:
+                       query += " and notesid = %s"
+                       values.append(notesid)
+                       cursor.execute(query,tuple(values))
+                       notes=cursor.fetchone()
+                  else:                                             
+                    cursor.execute(query,(userid,))
+                    notes=cursor.fetchall()
+                  db_config.commit()
+                  db_config.close()
+                  cursor.close()
+                  return True,notes
+             except Exception as e:
+                  return False,f"Something wrong in database/utilsDB.py-NotesQueries.getAllNotes):{e}"
+    
+                     
+                 
+            

@@ -1,6 +1,6 @@
 from flask import Flask,render_template,request,redirect,session,url_for
 from database import createTables
-from database import AuthQueries
+from database import AuthQueries,NotesQueries
 from utils import EmailTemplates,sendEmail,generateHashPassword,validateHashPassword
 import random
 #used to create token and validate token
@@ -49,6 +49,9 @@ def login():
             print("Password incorrect")
             return redirect('/login')
         #redirect to dashboard page
+        session.clear()
+        session['id']=user['userid']
+        session['username']=user['username']
         return redirect('/dashboard')
 
 @app.route("/register",methods=['GET','POST'])
@@ -160,14 +163,41 @@ def reset_password(token):
         return f"<h2>{msg}</h2>"
         #return msg like "Password updated"
 
-
-
+#Dashboard
 @app.route('/dashboard')
 def dashboard():
     if request.method== 'GET':
-        return render_template('dashboard.html') 
-    
+        return render_template('dashboard.html',username=session['username'])
+# =====================================================================================
+#                                      Notes Routes
+# =====================================================================================  
+@app.route('/dashboard/notes')
+def mynotes():
+    userid=session['id']
+    status,all_notes=NotesQueries.getAllNotes(userid=userid)
+    return render_template('notes.html',notes=all_notes)
 
+
+@app.route('/dashboard/notes/newnotes',methods=['GET','POST'])
+def newnotes():
+    if request.method == 'GET':
+        return render_template('newnotes.html')
+    if request.method == 'POST':
+        title=request.form.get('title')
+        content=request.form.get('content')
+        userid=session['id']
+        status,msg=NotesQueries.insertNotesRecord(userid=userid,title=title,content=content)
+        print(msg)
+        return redirect(url_for('mynotes'))
+#view notes
+@app.route('/dashboard/notes/view/<int:id>')
+def view_notes(id):
+    #get notes by using notes id
+    status,note=NotesQueries.getAllNotes(userid=session['id'],notesid=id)
+    return render_template('view_notes.html',title=note['title'],content=note['content'])
+
+
+    
 #main
 if __name__=="__main__":
     print(createTables())
