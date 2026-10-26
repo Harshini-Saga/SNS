@@ -6,10 +6,10 @@
 
 {% block navmenu %}
     <a href="/dashboard">Home</a>
-    <a href="#">Files</a>
+    <a href="/dashboard/files">Files</a>
     <a href="/dashboard/notes">Notes</a>
     <a href="#">Profile</a>
-    <a href="#">Logout</a>
+    <a href="/logout">Logout</a>
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         </div>
         <div>
             <div>
-                <button><a href="#">My Files</a></button>
+                <button><a href="/dashboard/files">My Files</a></button>
                 <button><a href="/dashboard/notes">My Notes</a></button>
             </div>
             <div>

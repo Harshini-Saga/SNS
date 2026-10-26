@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Upload Files
+{% endblock %}
+
+{% block navmenu %}
+    <a href="/dashboard">Home</a>
+    <a href="/dashboard/files">Files</a>
+    <a href="/dashboard/notes">Notes</a>
+    <a href="#">Profile</a>
+    <a href="/logout">Logout</a>
+{% endblock %}
+
+{% block content %}
+    <div style="text-align: center;">
+        <div>
+            <h2>SNS-Upload Files</h2>
+        </div>
+        <div>
+            <p>Here you can manage your Files.Start by Uploading first file</p>            
+        </div>
+        <form action="{{ url_for('upload_file')}}" 
+                method="POST" 
+                enctype="multipart/form-data">
+            <div>
+                <label for="file">Upload File</label>
+                <input type="file" name="file">
+            </div>
+            <div>
+                <button type="Submit">Upload</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

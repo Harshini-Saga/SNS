@@ -81,6 +81,104 @@ class NotesQueries:
              except Exception as e:
                   return False,f"Something wrong in database/utilsDB.py-NotesQueries.getAllNotes):{e}"
     
-                     
-                 
-            
+    # update notes
+    @staticmethod
+    def updateNotes(notesid:int, title:str, content:str):
+        try:
+            db_config = DatabaseConnection()
+            cursor = db_config.cursor(dictionary=True)
+            query = """update notes set title = %s, content = %s where notesid = %s"""
+            cursor.execute(query, (title, content, notesid))
+            db_config.commit()
+            db_config.close()
+            cursor.close()
+            return True, "Notes Updated"
+
+        except Exception as e:
+            return False, f"Something wrong in \
+        database/utilsDB.py-NotesQueries.updateNotes():{e}"
+
+
+    # delete notes
+    @staticmethod
+    def deleteNotes(notesid:int):
+        try:
+            db_config = DatabaseConnection()
+            cursor = db_config.cursor(dictionary=True)
+            query = """delete from notes where notesid = %s"""
+            cursor.execute(query, (notesid,))
+            db_config.commit()
+            db_config.close()
+            cursor.close()
+            return True, "Notes Deleted"
+
+        except Exception as e:
+            return False, f"Something wrong in \
+        database/utilsDB.py-NotesQueries.deleteNotes():{e}"
+
+    #Files queries
+class FileQueries:
+    @staticmethod
+    def insertFileRecord(file_data:tuple[str|int]):
+        try:
+               db_config=DatabaseConnection()
+               cursor = db_config.cursor()
+               query = """ insert into files(userid,originalname,storedname,mimetype,size,filepath)
+                            values(%s,%s,%s,%s,%s,%s)"""
+               cursor.execute(query,file_data)
+               db_config.commit()
+               cursor.close()
+               db_config.close()
+               return True,"File Uploaded"
+        except Exception as e: 
+             return False,f"Something wrong in database/utilsDB.FileQueries.insertFileRecord():{e}"
+    @staticmethod
+    def getAllFiles(userid:int,fileid:int=None):
+        try:
+            db_config=DatabaseConnection()
+            cursor=db_config.cursor(dictionary=True)
+            query = """select * from files where userid = %s"""
+            values=[userid]
+            if fileid:
+                query += " and fileid = %s"
+                values.append(fileid)
+                cursor.execute(query,tuple(values))
+                files=cursor.fetchone()
+            else:   
+                query += " order by created_at desc"                                          
+                cursor.execute(query,(userid,))
+                files=cursor.fetchall()
+            db_config.commit()
+            db_config.close()
+            cursor.close()
+            return True,files
+        except Exception as e:
+                      return False,f"Something wrong in database/utilsDB.py-FilesQueries.getAllfiles):{e}"    
+    @staticmethod
+    def deleteFiles(fileid:int):
+            try:
+                db_config = DatabaseConnection()
+                cursor = db_config.cursor(dictionary=True)
+                query = """delete from files where fileid = %s"""
+                cursor.execute(query, (fileid,))
+                db_config.commit()
+                db_config.close()
+                cursor.close()
+                return True, "Files Deleted"
+    
+            except Exception as e:
+                return False, f"Something wrong in database/utilsDB.py-FilesQueries.deleteFiles():{e}"
+    @staticmethod
+    def CountFilesNotes(fileid:int,notesid:int):
+            try:
+                db_config = DatabaseConnection()
+                cursor = db_config.cursor(dictionary=True)
+                query = """select count(*) from files where  """
+                cursor.execute(query, (fileid,))
+                db_config.commit()
+                db_config.close()
+                cursor.close()
+                return True, "Files Deleted"
+    
+            except Exception as e:
+                return False, f"Something wrong in database/utilsDB.py-FilesQueries.deleteFiles():{e}"
